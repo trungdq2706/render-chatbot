@@ -1,4 +1,5 @@
 import nltk
+nltk.download('punkt')
 import define
 from nltk.stem import WordNetLemmatizer
 lemmatizer=WordNetLemmatizer()
