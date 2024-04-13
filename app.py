@@ -7,6 +7,7 @@ import json
 from flask import Flask, render_template, request,redirect
 from flask_ngrok import run_with_ngrok
 import nltk
+nltk.download('punkt')
 from keras.models import load_model
 from nltk.stem import WordNetLemmatizer
 import Mysql

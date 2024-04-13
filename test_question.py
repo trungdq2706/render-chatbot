@@ -1,4 +1,5 @@
 import nltk
+nltk.download('punkt')
 import define
 import json
 import pickle
