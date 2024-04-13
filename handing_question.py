@@ -1,10 +1,10 @@
 import re
 import define
 from underthesea import sent_tokenize
-key={"cong nghe thong tin chat luong cao": 0 ,"cong nghe thong tin" : 0,"khoa hoc may tinh" : 1,"ki thuat pham mem":2,"he thong thong tin" :3}
+key={"cong nghe thong tin" : 0,"ky thuat du lieu" : 1,"an toan thong tin":2}
 def Punctuation(string):
 
-    punctuations = '''!()-[]{};:'"\<>./?@#$%^&*_~'''
+    punctuations = '''!()-[]{};:'"\<>./?@#$%^&*_~,'''
     for x in string.lower():
         if x in punctuations:
             string = string.replace(x, "")

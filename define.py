@@ -5,14 +5,15 @@ from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 import numpy as np
 import math
-word_nomean=['ạ','đi','em','thầy','ơi','e',"cô","vậy"]
+word_nomean=['ạ','đi','em','thầy','ơi','e',"cô","vậy","và","tôi"]
 def delete_word(s):
     s = s.lower()
-    s=s.split()
+    s= s.split()
     for i in range(len(s)):
         if s[i] in word_nomean:
             s[i]=""
     return " ".join(s)
+
 
 def no_accent_vietnamese(s):
     s = delete_word(s)
@@ -24,6 +25,7 @@ def no_accent_vietnamese(s):
     s = re.sub(r'[ùúụủũưừứựửữ]', 'u', s)
     s = re.sub(r'[ỳýỵỷỹ]', 'y', s)
     s = re.sub(r'[đ]', 'd', s)
+    # s = re.sub("[,]", "", s)
     return s
 def alias(s):
     s = s.replace('cntt','cong nghe thong tin')
@@ -39,6 +41,10 @@ def alias(s):
     s = s.replace('httt','he thong thong tin')
     s = s.replace('ktpm','ki thuat phan mem')
     s = s.replace('clc','chat luong cao')
+    s = s.replace('nckh','nghien cuu khoa hoc')
+    s = s.replace('sv','sinh vien')
+    s = s.replace('ktdl','ky thuat du lieu')
+    s = s.replace('attt','an toan thong tin')
     return s
 def distance_row(row1,row2):
     distance=0.0
@@ -46,26 +52,12 @@ def distance_row(row1,row2):
         distance += (row1[i]-row2[i])**2
     return math.sqrt(distance)
 def clean_up_sentence(sentence):
-    # sentence=sentence.lower()
     sentence_words=no_accent_vietnamese(sentence)
-    # sentence_words= alias(sentence_words)
     # print(sentence_words)
     sentence_words = nltk.word_tokenize(sentence_words)
     sentence_words = [word.lower() for word in sentence_words]
     # print(sentence_words)
     return sentence_words
-def bow(sentence, words):
-    # tokenize the pattern
-    sentence_words = clean_up_sentence(sentence)
-    # bag of words - matrix of N words, vocabulary matrix
-    bag = [0]*len(words)
-    for s in sentence_words:
-        for i,w in enumerate(words):
-            if w == s:
-                # assign 1 if current word is in the vocabulary position
-                bag[i] = 1
-    # print(np.array(bag))
-    return(np.array(bag))
 def accuracy_cosine(predict,test_Y):
      count=0
      for i in range(0,len(predict)):

@@ -12,6 +12,7 @@ from nltk.stem import WordNetLemmatizer
 import Mysql
 import handing_question
 import test_question
+import re
 # chat initialization
 model = load_model("chatbot_model.h5")
 intents = json.loads(open('data.json',encoding='utf-8').read())
@@ -125,7 +126,7 @@ def predict_class(sentence, model):
     return return_list
 def getResponse(ints, intents_json,stt):
     if len(ints) == 0 :
-        return "Xin lỗi, Hiện tại câu hỏi này tôi không thể trả lời bạn. Chúng tôi sẽ ghi nhận câu hỏi và cải thiện chất lượng","no_answer"
+        return "Xin lỗi, Hiện tại câu hỏi này tôi không thể trả lời bạn. Chúng tôi sẽ ghi nhận câu hỏi và cải thiện chất lượng. Bạn cho tôi xin gmail để tôi có thể liên hệ trực tiếp đến bạn","no_answer"
     tag = ints[0]["intent"]
     list_of_intents = intents_json["intents"]
     result=""
@@ -138,8 +139,8 @@ def getResponse(ints, intents_json,stt):
                     res_tag = tag
                     break
                 else:
-                    result = i['responses'][4]
-                    res_tag = tag+str(4)
+                    result = i['responses'][2]
+                    res_tag = tag+str(2)
                     break
         else:
             if i["tag"] == tag:
@@ -152,6 +153,20 @@ def getResponse(ints, intents_json,stt):
                     res_tag=tag+str(stt)
                     break
     return result,res_tag
+
+
+# def is_valid_gmail(email):
+#   """
+#   Kiểm tra xem chuỗi đầu vào có phải là địa chỉ Gmail hợp lệ hay không.
+
+#   Args:
+#       email: Chuỗi cần kiểm tra (kiểu str).
+
+#   Returns:
+#       True nếu là Gmail hợp lệ, False nếu không.
+#   """
+#   regex = r"^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$"
+#   return re.search(regex, email) is not None
 # print(msg)
 # msg="Ngành hệ thống thông tin xét học bạ sao ạ"
 # res=predict_class(msg,model)
