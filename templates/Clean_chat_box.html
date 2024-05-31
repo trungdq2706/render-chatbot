@@ -30,8 +30,8 @@ margin-top:10px;
 }
 
 .chat-avatar .avatar {
-    width: 30px
-        -webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.2),0 6px 10px 0 rgba(0,0,0,0.3);
+    width: 30px;
+    -webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.2),0 6px 10px 0 rgba(0,0,0,0.3);
     box-shadow: 0 2px 2px 0 rgba(0,0,0,0.2),0 6px 10px 0 rgba(0,0,0,0.3);
 }
 
@@ -145,6 +145,100 @@ margin-top:10px;
    padding: 10px;
    text-align: center;
 }
+
+#responseForm input[type="text"],
+#responseForm textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+#email {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#responseForm button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+#responseForm button:hover {
+    background-color: #45a049;
+}
+
+#responseForm {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  z-index: 9999; /* Đảm bảo form hiển thị phía trên */
+}
+
+.panel-title {
+  font-size: 24px; 
+  font-weight: bold; 
+  color: #333; 
+  margin-top: 15px;
+  text-align: center;
+}
+
+.panel-title i {
+  margin-right: 5px; 
+}
+
+#responseForm button[type="button"] {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+#responseForm button[type="button"]:hover {
+  background-color: darkred;
+}
+
+#responseForm button[type="button"]::before {
+  content: "X";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+}
+.button-container div {
+  float: left;
+  width: 20%; /* Adjust width as needed */
+}
+
+.button-container div:last-child {
+  float: right;
+}
+
     </style>
 </head>
 <body>
@@ -154,7 +248,7 @@ margin-top:10px;
   <div class="panel" id="chat">
     <div class="panel-heading">
       <h3 class="panel-title">
-        <i class="icon wb-chat-text" aria-hidden="true"></i> CHATBOT TƯ VẤN TUYỂN SINH
+        <i class="icon wb-chat-text" aria-hidden="true"></i> CHATBOT TƯ VẤN CHO SINH VIÊN CNTT VÀ KTDL
       </h3>
     </div>
     <div class="panel-body">
@@ -180,23 +274,40 @@ margin-top:10px;
             <input id="textInput" type="text" name="msg" placeholder="Message" class='form-control'/>
         </div>
       <div class="wrapper" >
-      <button id="start-record-btn" title="Start Recording" class="btn btn-primary">Start Recognition</button>
-      <button id="pause-record-btn" title="Pause Recording" class="btn btn-primary">Pause Recognition</button>
-        <p id="recording-instructions" class="card-text">Press the <strong>Start Recognition</strong> button and allow access.</p>
-  <button onclick="playAudio()" type="button" class="btn btn-primary">Play Audio</button>
-  <button onclick="pauseAudio()" type="button" class="btn btn-primary">Pause Audio</button>
 </div>
     </div>
   </div>
-  <div><a href="\sql" class="btn btn-primary stretched-link">Go History</a></div>
+<div class="button-container">
+    <div><a href="\sql" class="btn btn-primary stretched-link">Go History</a></div>
+    <div><a href="\homesendmail" class="btn btn-primary stretched-link">Send Email</a></div>
+</div>
 </div>
 </div>
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<form id="responseForm" style="display: none;">
+  <div style="text-align: right;">
+    <button type="button" onclick="closeForm()"></button>
+  </div>
+  <label for="question">Câu hỏi của bạn:</label><br>
+  <input type="text" id="question" name="question" placeholder="Câu hỏi" hidden><br>
+  <input type="email" id="email" name="email" placeholder="Email của bạn" required><br>
+  <button type="submit">Gửi</button>
+</form>
+
 <script>
-      var fileaudio;
-      var x;
+    function showResponseForm() {
+      $("#gmailInput").val("");
+      setTimeout(function() {
+        $("#responseForm").show(); 
+      }, 2000); 
+    }
+    function closeForm() {
+      $("#responseForm").hide();
+    }
+    var x; 
     function getBotResponse(){
       var rawText = $("#textInput").val();
       var userHtml = '<div class="chat"><div class="chat-avatar"><a class="avatar avatar-online" data-toggle="tooltip" href="#" data-placement="right" title="" data-original-title="June Lane"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="..."></a></div><div class="chat-body"><div class="chat-body"><div class="chat-content"><p>' + rawText+ "</p></div></div></div></div>";
@@ -209,31 +320,24 @@ margin-top:10px;
           var dt=data.split(' ');
           var len = parseInt(dt[dt.length-1])
           dt=dt.slice(0,dt.length-len-1).join(' ');
-          fileaudio=data.split(' ');
-          fileaudio=fileaudio.slice(fileaudio.length-len-1,fileaudio.length-1);
-          // if( fileaudio[0] == ""){
-          //   fileaudio.splice(0, 1);
-          // }
-          // fileaudio=fileaudio[0];
-          // x = document.getElementById(fileaudio);
-          var botHtml = '<div class="chat chat-left"><div class="chat-avatar"><a class="avatar avatar-online" data-toggle="tooltip" href="#" data-placement="left" title="" data-original-title="Edward Fletcher"><img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="..."></a></div><div class="chat-body"><div class="chat-content"><p>'+"trả lời câu hỏi : "+rawText+ '</br>' +dt+'</p></div></div></div>';
+          var botHtml = '<div class="chat chat-left"><div class="chat-avatar"><a class="avatar avatar-online" data-toggle="tooltip" href="#" data-placement="left" title="" data-original-title="Edward Fletcher"><img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="..."></a></div><div class="chat-body"><div class="chat-content"><p>'+"Trả lời câu hỏi : "+rawText+ '</br>' +dt+'</p></div></div></div>';
           $('#chatbot').append(botHtml);
           document
           .getElementById("userInput")
           .scrollIntoView({block:"start",behavior: "smooth" });
-          // i=0;
-          // // var playlist = new Array('C:/Users/Admin/Desktop/luanvan/static/audio/diemchuan.mp3','C:/Users/Admin/Desktop/luanvan/static/audio/chitieu.mp3');
-          // console.log(fileaudio)
-          // var playlist=fileaudio;
-          // audio.addEventListener('ended', function () {
-          //   if(i++<playlist.length){
-          //     audio.src = playlist[i];
-          //     audio.play();
-          //   }
-          // }, true);
-          // audio.loop = false;
-          // audio.src = playlist[0];
-          // audio.play();
+
+          var dta = data.split('</br>');
+          var lastPart = dta[dta.length - 1];
+          var hasNoAnswer = lastPart.includes("no_answer");
+          if (hasNoAnswer) {
+            showResponseForm();
+            $("#question").val(rawText);
+            $("#responseForm").submit(function(e) {
+            e.preventDefault(); // Ngăn chặn gửi form mặc định
+            // Thêm mã xử lý cho dữ liệu được gửi
+            $(this).hide();
+          });
+          }
         });
     }
     $("#textInput").keypress(function(e) {
@@ -241,126 +345,31 @@ margin-top:10px;
         getBotResponse();
       }
     });
-    try {
-      var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      var recognition = new SpeechRecognition();
-    }
-    catch(e) {
-      console.error(e);
-      $('.no-browser-support').show();
-      $('.app').hide();
-    }
-
-    var noteTextarea = $('#textInput');
-    var instructions = $('#recording-instructions');
-    var voice = 0;
-
-    var noteContent = '';
-    var audio = new Audio();
-
-    recognition.continuous=  true;
-
-    recognition.onresult = function(event) {
-
-
-      var current = event.resultIndex;
-
-
-      var transcript = event.results[current][0].transcript;
-
-
-      var mobileRepeatBug = (current == 1 && transcript == event.results[0][0].transcript);
-
-      if(!mobileRepeatBug) {
-        noteContent = transcript;
-        var userHtml = '<div class="chat"><div class="chat-avatar"><a class="avatar avatar-online" data-toggle="tooltip" href="#" data-placement="right" title="" data-original-title="June Lane"><img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="..."></a></div><div class="chat-body"><div class="chat-body"><div class="chat-content"><p>' +noteContent+ "</p></div></div></div></div>";
-        $("#chatbot").append(userHtml);
-        document
-        .getElementById("userInput")
-        .scrollIntoView({block : "start",behavior: "smooth"});
-        $.get("/get1", { msg:  noteContent }).done(function(data){
-          // console.log(voice)
-          var dt=data.split(' ');
-          var len = parseInt(dt[dt.length-1])
-          dt=dt.slice(0,dt.length-len-1).join(' ');
-          fileaudio=data.split(' ');
-          fileaudio=fileaudio.slice(fileaudio.length-len-1,fileaudio.length-1);
-          var botHtml = '<div class="chat chat-left"><div class="chat-avatar"><a class="avatar avatar-online" data-toggle="tooltip" href="#" data-placement="left" title="" data-original-title="Edward Fletcher"><img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="..."></a></div><div class="chat-body"><div class="chat-content"><p>'+"Trả lời cho câu hỏi "+noteContent+'</br>'+dt+'</p></div></div></div>';
-          $('#chatbot').append(botHtml);
-          document
-          .getElementById("userInput")
-          .scrollIntoView({block:"start",behavior: "smooth" });
-          if(voice==1){
-            playAudio();
-            // var playlist = new Array('C:/Users/Admin/Desktop/luanvan/static/audio/diemchuan.mp3','C:/Users/Admin/Desktop/luanvan/static/audio/chitieu.mp3');
-
-          }
-        });
-          // var dt=data.split(' ');
-          // dt=dt.slice(0,dt.length-3).join(' ');
-          // fileaudio=data.split(' ');
-          // fileaudio=fileaudio.slice(fileaudio.length-3,fileaudio.length-1);
-          // if( fileaudio[0] == ""){
-          //   fileaudio.splice(0, 1);
-          // }
-          // fileaudio=fileaudio[0];
-          // x = document.getElementById(fileaudio);
-        // noteTextarea.val(noteContent);
+    $("#responseForm").submit(function(e) {
+      e.preventDefault(); // Prevent default form submission
+      var userEmail = $("#email").val();
+      var userQuestion = $("#question").val();
+    $.ajax({
+      url: '/save_question_gmail', // Replace with your endpoint URL
+      method: 'POST',
+      data: {
+        question: userQuestion,
+        email: userEmail
+      },
+      success: function(response) {
+        if (response.status === 'success') {
+          alert("Gửi thành công! Cảm ơn bạn đã gửi câu hỏi.");
+          $("#responseForm").hide(); // Hide form after successful submission
+        } else {
+          alert("Có lỗi xảy ra, vui lòng thử lại!");
+        }
+      },
+      error: function(error) {
+        console.error("Error saving data:", error);
+        alert("Có lỗi xảy ra, vui lòng thử lại!");
       }
-    };
-
-    recognition.onstart = function() {
-      instructions.text('Bắt đầu nhận dạng giọng nói');
-      voice=1;
-    }
-
-    recognition.onspeechend = function() {
-      instructions.text('Turn off');
-      voice=0;
-    }
-
-    recognition.onerror = function(event) {
-      if(event.error == 'no-speech') {
-        instructions.text('No speech was detected. Try again.');
-      };
-    }
-
-
-    $('#start-record-btn').on('click', function(e) {
-      recognition.start();
     });
-
-
-    $('#pause-record-btn').on('click', function(e) {
-      recognition.stop();
-      instructions.text('Voice recognition paused.');
-    });
-
-    // Sync the text inside the text area with the noteContent variable.
-    noteTextarea.on('input', function() {
-      noteContent = $(this).val();
-    })
-// document.getElementById("demo").innerHTML = fileaudio
-// var audio = new Audio();
-function playAudio(){
-  i=0;
-// var playlist = new Array('C:/Users/Admin/Desktop/luanvan/static/audio/diemchuan.mp3','C:/Users/Admin/Desktop/luanvan/static/audio/chitieu.mp3');
-var playlist=fileaudio;
-audio.addEventListener('ended', function () {
-  if(i++<playlist.length+1){
-  audio.src = playlist[i];
-  audio.play();
-}
-}, true);
-audio.loop = false;
-audio.src = playlist[0];
-audio.play();
-}
-
-function pauseAudio() {
-    audio.pause();
-  }
-
+  });
 </script>
 </body>
 </html>

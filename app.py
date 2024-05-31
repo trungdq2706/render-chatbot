@@ -1,19 +1,18 @@
 # libraries
 import define
-import random
 import numpy as np
 import pickle
 import json
-from flask import Flask, render_template, request,redirect
+from flask import Flask, render_template, request,redirect,jsonify
 from flask_ngrok import run_with_ngrok
 import nltk
 nltk.download('punkt')
 from keras.models import load_model
-from nltk.stem import WordNetLemmatizer
 import Mysql
 import handing_question
 import test_question
-import re
+import yagmail
+import os
 # chat initialization
 model = load_model("chatbot_model.h5")
 intents = json.loads(open('data.json',encoding='utf-8').read())
@@ -31,19 +30,25 @@ def chatbot_response():
     msg=handing_question.handing(msg1)
     print(msg)
     res=""
-    # t="test2"
     tag_temp=""
     for i in msg:
-        # print(i)
         int = predict_class(i,model)
-        # print(msg[i])
         r,tag_question = getResponse(int,intents,msg[i])
         tag_temp=tag_temp+tag_question+" "
         res= res+"</br>"+ r + "</br>"
-        # print(res)
-    mp3,len=fileaudio_text(tag_temp)
+    tag,len=process_tag(tag_temp)
     Mysql.execute_query_insert(connection,msg1,tag_temp)
-    return res+" "+ mp3+str(len)
+    return res+" "+ tag +str(len)
+@app.route("/save_question_gmail", methods=['POST'])
+def saveUserData():
+    question = request.form["question"]
+    email = request.form["email"]
+  # Open file in append mode
+    with open("unanswered_questions.txt", "a", encoding="utf-8") as f:
+        f.write(f"Câu hỏi: {question}\nEmail: {email}\n")
+    return jsonify({
+    "status": "success"
+  })
 @app.route("/sql")
 def my_sql():
     connection = Mysql.create_connection("sm_app.sqlite")
@@ -51,7 +56,6 @@ def my_sql():
     rows=Mysql.execute_read_query(connection, select_users)
     # print(rows)
     return render_template("index.html",rows = rows)
-
 @app.route('/detele/<int:id>',methods=['GET', 'POST'])
 def delete_sql(id):
     # print(id)
@@ -60,14 +64,14 @@ def delete_sql(id):
     return redirect("/sql")
 
 # @app.route("/get2")
-def fileaudio_text(tag):
+def process_tag(tag):
     tag=tag.strip()
     file=tag.split(" ")
     print(file)
     r=""
     for i in file:
-        r=r+"static/audio/"+i+".mp3"+" "
-    return r,len(file)
+        r=r + i +" "
+    return r, len(file)
 
 @app.route('/add_question/<string:str>',methods=['GET','POST'])
 def add_ques(str):
@@ -95,6 +99,55 @@ def process_add_tag():
         cautraloi=request.form["cautraloi"]
         note= test_question.add_new_tag(question,tag,cautraloi)
         return render_template("add.html",res1=note)
+emails = [
+    {"name": "Trung", "email": "tytmmvsd@gmail.com"},
+    {"name": "Lưu", "email": "20133104@student.hcmute.edu.vn"},
+]
+@app.route("/homesendmail")
+def home_sendmail():
+    return render_template("send-mail.html", emails=emails)
+
+@app.route("/send-email", methods=['POST'])
+def send_email():
+    upload_dir = 'D:\Chatbot2'
+  # Extract form data from the request
+    to_email = request.form["to_email"]
+    subject = request.form["subject"]
+    body = request.form["body"]#
+    attachment = "unanswered_questions.txt"
+    try:
+        yag = yagmail.SMTP("trungdq.de@gmail.com","navwolwemfmtlubm")
+        yag.send(to=to_email,subject=subject,contents=body,attachments=attachment)
+        uploaded_file_path = os.path.join(upload_dir, attachment) if attachment else None
+        if uploaded_file_path:
+            with open(uploaded_file_path, 'w') as f:  # Truncate the file
+                f.truncate(0)
+        return jsonify({'status': 'success', 'message': 'Email sent successfully!'})
+    except Exception as e:
+        # Handle errors and log them
+        print(f"Error sending email")
+        return jsonify({'status': 'error', 'message': 'Failed to send email!'})
+@app.route("/send-allemail", methods=['POST'])
+def send_allemail():
+    upload_dir = 'D:\Chatbot2'
+    subject = request.form["subject"]
+    body = request.form["body"]
+    attachment = "unanswered_questions.txt"
+    try:
+        yag = yagmail.SMTP("trungdq.de@gmail.com","navwolwemfmtlubm")
+        recipient_emails = [email["email"] for email in emails]
+        for recipient in recipient_emails:
+            yag.send(to=recipient,subject=subject,contents=body,attachments=attachment)
+        uploaded_file_path = os.path.join(upload_dir, attachment) if attachment else None
+        if uploaded_file_path:
+            with open(uploaded_file_path, 'w') as f:  # Truncate the file
+                f.truncate(0)
+        return jsonify({'status': 'success', 'message': 'Email sent successfully!'})
+    except Exception as e:
+        # Handle errors and log them
+        print(f"Error sending email")
+        return jsonify({'status': 'error', 'message': 'Failed to send email!'})
+
 
 def bow(sentence, words):
     # tokenize the pattern
@@ -127,7 +180,7 @@ def predict_class(sentence, model):
     return return_list
 def getResponse(ints, intents_json,stt):
     if len(ints) == 0 :
-        return "Xin lỗi, Hiện tại câu hỏi này tôi không thể trả lời bạn. Chúng tôi sẽ ghi nhận câu hỏi và cải thiện chất lượng. Bạn cho tôi xin gmail để tôi có thể liên hệ trực tiếp đến bạn","no_answer"
+        return "Xin lỗi, hiện tại tôi không thể trả lời câu hỏi này. Tôi sẽ ghi nhận câu hỏi và cải thiện chất lượng dịch vụ. Bạn có thể cung cấp địa chỉ email để chúng tôi có thể liên hệ trực tiếp sau khi xử lý.","no_answer"
     tag = ints[0]["intent"]
     list_of_intents = intents_json["intents"]
     result=""
@@ -155,23 +208,5 @@ def getResponse(ints, intents_json,stt):
                     break
     return result,res_tag
 
-
-# def is_valid_gmail(email):
-#   """
-#   Kiểm tra xem chuỗi đầu vào có phải là địa chỉ Gmail hợp lệ hay không.
-
-#   Args:
-#       email: Chuỗi cần kiểm tra (kiểu str).
-
-#   Returns:
-#       True nếu là Gmail hợp lệ, False nếu không.
-#   """
-#   regex = r"^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$"
-#   return re.search(regex, email) is not None
-# print(msg)
-# msg="Ngành hệ thống thông tin xét học bạ sao ạ"
-# res=predict_class(msg,model)
-# print(res)
-# print(classes)
 if __name__ == "__main__":
-    app.run(debug=True,host='0.0.0.0')
+    app.run()

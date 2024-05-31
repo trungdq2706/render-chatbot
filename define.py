@@ -1,9 +1,7 @@
 import re
-from scipy import spatial
 import nltk
 from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
-import numpy as np
 import math
 word_nomean=['ạ','đi','em','thầy','ơi','e',"cô","vậy","và","tôi"]
 def delete_word(s):
@@ -53,10 +51,8 @@ def distance_row(row1,row2):
     return math.sqrt(distance)
 def clean_up_sentence(sentence):
     sentence_words=no_accent_vietnamese(sentence)
-    # print(sentence_words)
     sentence_words = nltk.word_tokenize(sentence_words)
     sentence_words = [word.lower() for word in sentence_words]
-    # print(sentence_words)
     return sentence_words
 def accuracy_cosine(predict,test_Y):
      count=0

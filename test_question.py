@@ -1,16 +1,7 @@
-import nltk
-nltk.download('punkt')
 import define
 import json
-import pickle
-import numpy as np
-import random
 import define
-# from keras.models import load_model
-words=[]
-classes=[]
-documents=[]
-ignore_words=['?','!','.',',','a','v','xét']
+
 data_file=open('data.json',encoding='utf-8').read()
 intents=json.loads(data_file)
 
@@ -51,8 +42,3 @@ def add_new_tag(question,tag,ans):
         json.dump(intents,file,ensure_ascii=False,indent=3)
     return "Đã thêm thành công"
 
-#     # print(intents["intents"])
-# # add_question_json()
-# k=add_question_intotag("diem chuan nganh","phuongthucxettuyen")
-# # k=add_new_tag("diem chuan nganh","dienchuan","diem chuan nay kia")
-# print(k)
