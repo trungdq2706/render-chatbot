@@ -209,4 +209,4 @@ def getResponse(ints, intents_json,stt):
     return result,res_tag
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True,host='0.0.0.0')

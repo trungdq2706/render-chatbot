@@ -5,3 +5,4 @@ scipy
 underthesea
 flask_ngrok
 tensorflow
+yagmail
