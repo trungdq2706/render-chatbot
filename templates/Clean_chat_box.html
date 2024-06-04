@@ -238,7 +238,107 @@ margin-top:10px;
 .button-container div:last-child {
   float: right;
 }
+/* New styles for login button */
+#loginButton {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    z-index: 9999;
+}
 
+#loginButton:hover {
+    background-color: #0056b3;
+}
+
+#loginForm {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    z-index: 9999;
+    display: none;
+}
+
+#loginForm button[type="button"] {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+}
+
+#loginForm button[type="button"]:hover {
+    background-color: darkred;
+}
+
+#loginForm button[type="button"]::before {
+    content: "X";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+}
+#loginForm input[type="text"],
+#loginForm textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    outline: none;
+}
+#loginForm input[type="password"],
+#loginForm textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    outline: none;
+}
+#loginForm button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+.button-container a {
+  display: none; /* Ẩn mặc định */
+}
+.d-flex {
+  display: flex;
+  align-items: center;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+.ml-2 {
+  margin-left: 10px; /* Adjust as necessary */
+}
     </style>
 </head>
 <body>
@@ -250,6 +350,7 @@ margin-top:10px;
       <h3 class="panel-title">
         <i class="icon wb-chat-text" aria-hidden="true"></i> CHATBOT TƯ VẤN CHO SINH VIÊN CNTT VÀ KTDL
       </h3>
+      <button id="loginButton" onclick="showLoginForm()" >Đăng nhập Admin</button>
     </div>
     <div class="panel-body">
       <div class="chats" id = "chatbot">
@@ -270,8 +371,9 @@ margin-top:10px;
     </div>
     <div class="panel-footer">
       <!-- <form> -->
-        <div class="form-group" id="userInput">
+        <div class="form-group d-flex" id="userInput">
             <input id="textInput" type="text" name="msg" placeholder="Message" class='form-control'/>
+            <button onclick="getBotResponse()" class="btn btn-primary ml-2">Gửi</button>
         </div>
       <div class="wrapper" >
 </div>
@@ -280,6 +382,9 @@ margin-top:10px;
 <div class="button-container">
     <div><a href="\sql" class="btn btn-primary stretched-link">Go History</a></div>
     <div><a href="\homesendmail" class="btn btn-primary stretched-link">Send Email</a></div>
+</div>
+<div class="button-gopage">
+  <div><a href="http://35.184.194.18:8080/" class="btn btn-primary stretched-link">Về trang khoa</a></div>
 </div>
 </div>
 </div>
@@ -296,7 +401,15 @@ margin-top:10px;
   <input type="email" id="email" name="email" placeholder="Email của bạn" required><br>
   <button type="submit">Gửi</button>
 </form>
-
+<form id="loginForm">
+  <div style="text-align: right;">
+      <button type="button" onclick="closeLoginForm()"></button>
+  </div>
+  <label for="login">Đăng nhập</label><br>
+  <input type="text" id="adminUsername" name="adminUsername" placeholder="Username" required><br>
+  <input type="password" id="adminPassword" name="adminPassword" placeholder="Password" required><br>
+  <button type="submit">Đăng nhập</button>
+</form>
 <script>
     function showResponseForm() {
       $("#gmailInput").val("");
@@ -307,6 +420,42 @@ margin-top:10px;
     function closeForm() {
       $("#responseForm").hide();
     }
+    function showLoginForm() {
+      $("#loginForm").show();
+  }
+
+  function closeLoginForm() {
+      $("#loginForm").hide();
+  }
+  function handleLogin(event) {
+    event.preventDefault();
+    var username = $("#adminUsername").val();
+    var password = $("#adminPassword").val();
+
+    // Dummy check for demonstration, replace with real authentication logic
+    if (username === "admin" && password === "admin") {
+        $("#loginButton").text("Đăng xuất");
+        $("#loginButton").off("click").on("click", function() {
+            handleLogout();
+        });
+        $(".button-container a").show();
+        $(".button-gopage a").hide();
+        closeLoginForm();
+    } else {
+        alert("Sai tên đăng nhập hoặc mật khẩu");
+    }
+}
+
+function handleLogout() {
+    $("#loginButton").text("Đăng nhập");
+    $("#loginButton").off("click").on("click", function() {
+        showLoginForm();
+    });
+    $(".button-container a").hide();
+    $(".button-gopage a").show();
+    closeLoginForm();
+    $("#adminPassword").val('');
+} 
     var x; 
     function getBotResponse(){
       var rawText = $("#textInput").val();
@@ -370,6 +519,13 @@ margin-top:10px;
       }
     });
   });
+  $(document).ready(function() {
+    $("#loginButton").on("click", function() {
+        showLoginForm();
+    });
+
+    $("#loginForm").on("submit", handleLogin);
+});
 </script>
 </body>
 </html>

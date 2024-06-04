@@ -22,7 +22,9 @@ app = Flask(__name__)
 @app.route("/", methods=['GET', 'POST'])
 def home():
     return render_template("Clean_chat_box.html")
-
+@app.route("/login", methods=['GET', 'POST'])
+def Login():
+    return render_template("login.html")
 @app.route("/get1")
 def chatbot_response():
     msg1 = request.args.get('msg')
