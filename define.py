@@ -2,8 +2,8 @@ import re
 import nltk
 from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
-import math
 word_nomean=['ạ','đi','em','thầy','ơi','e',"cô","vậy","và","tôi"]
+#Hàm xóa các từ trong word_nomen
 def delete_word(s):
     s = s.lower()
     s= s.split()
@@ -12,7 +12,7 @@ def delete_word(s):
             s[i]=""
     return " ".join(s)
 
-
+#Hàm để thay thế các từ gõ sai và có dấu thành chữ không dấu
 def no_accent_vietnamese(s):
     s = delete_word(s)
     s = alias(s)
@@ -23,8 +23,8 @@ def no_accent_vietnamese(s):
     s = re.sub(r'[ùúụủũưừứựửữ]', 'u', s)
     s = re.sub(r'[ỳýỵỷỹ]', 'y', s)
     s = re.sub(r'[đ]', 'd', s)
-    # s = re.sub("[,]", "", s)
     return s
+#hàm thay thế các từ viết tắt thành từ có nghĩa
 def alias(s):
     s = s.replace('cntt','cong nghe thong tin')
     s = s.replace('bn','bao nhieu')
@@ -44,19 +44,9 @@ def alias(s):
     s = s.replace('ktdl','ky thuat du lieu')
     s = s.replace('attt','an toan thong tin')
     return s
-def distance_row(row1,row2):
-    distance=0.0
-    for i in range(len(row1)-1):
-        distance += (row1[i]-row2[i])**2
-    return math.sqrt(distance)
+#Hàm chuẩn hóa một câu văn bản đầu vào
 def clean_up_sentence(sentence):
     sentence_words=no_accent_vietnamese(sentence)
     sentence_words = nltk.word_tokenize(sentence_words)
     sentence_words = [word.lower() for word in sentence_words]
     return sentence_words
-def accuracy_cosine(predict,test_Y):
-     count=0
-     for i in range(0,len(predict)):
-         if predict[i]==test_Y[i]:
-             count+=1
-     return (count/len(predict))*100

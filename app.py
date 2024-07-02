@@ -8,27 +8,28 @@ from flask_ngrok import run_with_ngrok
 import nltk
 nltk.download('punkt')
 from keras.models import load_model
-import Mysql
+import Sqlite
 import handing_question
 import test_question
 import yagmail
 import os
-# chat initialization
 model = load_model("chatbot_model.h5")
 intents = json.loads(open('data.json',encoding='utf-8').read())
 words = pickle.load(open("words.pkl", "rb"))
 classes = pickle.load(open("classes.pkl", "rb"))
 app = Flask(__name__)
 @app.route("/", methods=['GET', 'POST'])
+#Hàm trả về trang chính
 def home():
     return render_template("Clean_chat_box.html")
-@app.route("/login", methods=['GET', 'POST'])
+@app.route("/admin", methods=['GET', 'POST'])
 def Login():
-    return render_template("login.html")
+    return render_template("Clean_chat_box_admin.html")
 @app.route("/get1")
+#Hàm nhận vào đầu vào câu hỏi
 def chatbot_response():
     msg1 = request.args.get('msg')
-    connection = Mysql.create_connection("sm_app.sqlite")
+    connection = Sqlite.create_connection("sm_app.sqlite")
     msg=handing_question.handing(msg1)
     print(msg)
     res=""
@@ -39,9 +40,10 @@ def chatbot_response():
         tag_temp=tag_temp+tag_question+" "
         res= res+"</br>"+ r + "</br>"
     tag,len=process_tag(tag_temp)
-    Mysql.execute_query_insert(connection,msg1,tag_temp)
+    Sqlite.execute_query_insert(connection,msg1,tag_temp)
     return res+" "+ tag +str(len)
 @app.route("/save_question_gmail", methods=['POST'])
+#Hàm lấy dữ liệu danh sách gmail
 def saveUserData():
     question = request.form["question"]
     email = request.form["email"]
@@ -52,20 +54,21 @@ def saveUserData():
     "status": "success"
   })
 @app.route("/sql")
+#Hàm kết nối database load Go history
 def my_sql():
-    connection = Mysql.create_connection("sm_app.sqlite")
+    connection = Sqlite.create_connection("sm_app.sqlite")
     select_users = "SELECT * from users"
-    rows=Mysql.execute_read_query(connection, select_users)
+    rows=Sqlite.execute_read_query(connection, select_users)
     # print(rows)
     return render_template("index.html",rows = rows)
 @app.route('/detele/<int:id>',methods=['GET', 'POST'])
+#Hàm xóa câu hỏi trong history
 def delete_sql(id):
     # print(id)
-    connection = Mysql.create_connection("sm_app.sqlite")
-    Mysql.execute_query_delete(connection,id)
+    connection = Sqlite.create_connection("sm_app.sqlite")
+    Sqlite.execute_query_delete(connection,id)
     return redirect("/sql")
 
-# @app.route("/get2")
 def process_tag(tag):
     tag=tag.strip()
     file=tag.split(" ")
@@ -76,6 +79,7 @@ def process_tag(tag):
     return r, len(file)
 
 @app.route('/add_question/<string:str>',methods=['GET','POST'])
+#Hàm này kiểm tra xem một câu hỏi đã tồn tại trong cơ sở dữ liệu huấn luyện hay chưa
 def add_ques(str):
     text=str
     x,tag = test_question.test(str)
@@ -84,7 +88,7 @@ def add_ques(str):
         return render_template("add.html",results=results,key=x)
     else:
         return render_template("add.html",results=tag,key=x,qes=text)
-
+#Hàm thêm câu hỏi khi đã có nhãn sẵn
 @app.route('/process_add',methods=['GET','POST'])
 def process_add():
     if request.method == 'POST':
@@ -92,7 +96,7 @@ def process_add():
         tag =  request.form["tag"]
         note= test_question.add_question_intotag(question,tag)
         return render_template("add.html",res=note)
-
+#Hàm thêm câu hỏi khi có nhãn mới
 @app.route('/process_add_tag',methods=['GET','POST'])
 def process_add_tag():
     if request.method == 'POST':
@@ -106,13 +110,14 @@ emails = [
     {"name": "Lưu", "email": "20133104@student.hcmute.edu.vn"},
 ]
 @app.route("/homesendmail")
+#Hàm trang chủ gửi mail
 def home_sendmail():
     return render_template("send-mail.html", emails=emails)
 
 @app.route("/send-email", methods=['POST'])
+#Hàm gửi email cho 1 người
 def send_email():
     upload_dir = 'D:\Chatbot2'
-  # Extract form data from the request
     to_email = request.form["to_email"]
     subject = request.form["subject"]
     body = request.form["body"]#
@@ -130,6 +135,7 @@ def send_email():
         print(f"Error sending email")
         return jsonify({'status': 'error', 'message': 'Failed to send email!'})
 @app.route("/send-allemail", methods=['POST'])
+#Hàm gửi mail cho tất cả
 def send_allemail():
     upload_dir = 'D:\Chatbot2'
     subject = request.form["subject"]
@@ -150,36 +156,30 @@ def send_allemail():
         print(f"Error sending email")
         return jsonify({'status': 'error', 'message': 'Failed to send email!'})
 
-
+#Hàm tạo ra biểu diễn vector cho mỗi câu hỏi
 def bow(sentence, words):
-    # tokenize the pattern
     sentence_words = define.clean_up_sentence(sentence)
-    # print(sentence_words)
-    # bag of words - matrix of N words, vocabulary matrix
     bag = [0] * len(words)
     for s in sentence_words:
         for i, w in enumerate(words):
             if w == s:
-                # assign 1 if current word is in the vocabulary position
                 bag[i] = 1
     return np.array(bag)
-
+#Hàm dự đoán lớp 
 def predict_class(sentence, model):
-    # filter out predictions below a threshold
     p = bow(sentence, words)
     temp=np.array([0]*len(p))
     if np.array_equal(p,temp) :
         return []
-    # print(p)
     res = model.predict(np.array([p]))[0]
     ERROR_THRESHOLD = 0.9
     results = [[i, r] for i, r in enumerate(res) if r > ERROR_THRESHOLD]
-    # sort by strength of probability
     results.sort(key=lambda x: x[1], reverse=True)
     return_list = []
     for r in results:
         return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
     return return_list
+#Hàm trả lời câu hỏi 
 def getResponse(ints, intents_json,stt):
     if len(ints) == 0 :
         return "Xin lỗi, hiện tại tôi không thể trả lời câu hỏi này. Tôi sẽ ghi nhận câu hỏi và cải thiện chất lượng dịch vụ. Bạn có thể cung cấp địa chỉ email để chúng tôi có thể liên hệ trực tiếp sau khi xử lý.","no_answer"

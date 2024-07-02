@@ -13,7 +13,9 @@ classes=[]
 documents=[]
 ignore_words=['?','!','.',',','a','v','xét']
 data_file=open('data.json',encoding='utf-8').read()
+#Load file json 
 intents=json.loads(data_file)
+#Thu thập từ vựng và các lớp (thẻ)
 total=0
 for intent in intents['intents']:
     for pattern in intent['patterns']:
@@ -29,6 +31,7 @@ classes=sorted(list(set(classes)))
 
 pickle.dump(words,open('words.pkl','wb'))
 pickle.dump(classes,open('classes.pkl','wb'))
+#Chuẩn bị dữ liệu huấn luyện
 training=[]
 output_empty=[0]*len(classes)
 for doc in documents:
@@ -45,7 +48,7 @@ for doc in documents:
 training=np.array(training,dtype=object)
 train_x=list(training[:,0])
 train_y=list(training[:,1])
-
+#Hàm tạo model
 def create_model():
     model = Sequential()
     model.add(Dense(128, input_dim=len(train_x[0]), activation='tanh'))
@@ -59,7 +62,7 @@ def create_model():
 
 train_x=np.array(train_x)
 train_y=np.array(train_y)
-
+#Hàm chia tập dữ liệu train test
 from sklearn.model_selection import train_test_split
 train_data, test_data, train_labels, test_labels = train_test_split(train_x, train_y, test_size=0.2, random_state=42)
 model = create_model()

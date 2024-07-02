@@ -324,9 +324,6 @@ margin-top:10px;
   cursor: pointer;
   width: 100%;
 }
-.button-container a {
-  display: none; /* Ẩn mặc định */
-}
 .d-flex {
   display: flex;
   align-items: center;
@@ -350,7 +347,7 @@ margin-top:10px;
       <h3 class="panel-title">
         <i class="icon wb-chat-text" aria-hidden="true"></i> CHATBOT TƯ VẤN CHO SINH VIÊN CNTT VÀ KTDL
       </h3>
-      <button id="loginButton" onclick="showLoginForm()" >Đăng nhập Admin</button>
+      <button id="loginButton" onclick="handleLogout()" >Đăng xuất</button>
     </div>
     <div class="panel-body">
       <div class="chats" id = "chatbot">
@@ -383,9 +380,6 @@ margin-top:10px;
     <div><a href="\sql" class="btn btn-primary stretched-link">Go History</a></div>
     <div><a href="\homesendmail" class="btn btn-primary stretched-link">Send Email</a></div>
 </div>
-<div class="button-gopage">
-  <div><a href="http://35.184.194.18:8080/" class="btn btn-primary stretched-link">Về trang khoa</a></div>
-</div>
 </div>
 </div>
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
@@ -401,54 +395,27 @@ margin-top:10px;
   <input type="email" id="email" name="email" placeholder="Email của bạn" required><br>
   <button type="submit">Gửi</button>
 </form>
-<form id="loginForm">
-  <div style="text-align: right;">
-      <button type="button" onclick="closeLoginForm()"></button>
-  </div>
-  <label for="login">Đăng nhập</label><br>
-  <input type="text" id="adminUsername" name="adminUsername" placeholder="Username" required><br>
-  <input type="password" id="adminPassword" name="adminPassword" placeholder="Password" required><br>
-  <button type="submit">Đăng nhập</button>
-</form>
 <script>
     function showResponseForm() {
       $("#gmailInput").val("");
       setTimeout(function() {
         $("#responseForm").show(); 
-      }, 2000); 
+      }, 2500); 
     }
     function closeForm() {
       $("#responseForm").hide();
     }
-    function showLoginForm() {
-      $("#loginForm").show();
-  }
-
-  function closeLoginForm() {
-      $("#loginForm").hide();
-  }
-  function handleLogin(event) {
-    event.preventDefault();
-    var username = $("#adminUsername").val();
-    var password = $("#adminPassword").val();
-    if (username === "admin" && password === "admin") {
-      document.cookie = "username=" + username + "; path=/";
-        window.location.href = "/admin";
-    } else {
-        alert("Sai tên đăng nhập hoặc mật khẩu");
-    }
-}
-
-function handleLogout() {
-    $("#loginButton").text("Đăng nhập");
-    $("#loginButton").off("click").on("click", function() {
-        showLoginForm();
-    });
-    $(".button-container a").hide();
-    $(".button-gopage a").show();
-    closeLoginForm();
-    $("#adminPassword").val('');
-} 
+    function handleLogout() {
+      /*$("#loginButton").text("Đăng nhập");
+      $("#loginButton").off("click").on("click", function() {
+          showLoginForm();
+      });
+      $(".button-container a").hide();
+      $(".button-gopage a").show();
+      closeLoginForm();
+      $("#adminPassword").val('');*/
+      window.location.href = "/";
+  } 
     var x; 
     function getBotResponse(){
       var rawText = $("#textInput").val();
@@ -512,13 +479,6 @@ function handleLogout() {
       }
     });
   });
-  $(document).ready(function() {
-    $("#loginButton").on("click", function() {
-        showLoginForm();
-    });
-
-    $("#loginForm").on("submit", handleLogin);
-});
 </script>
 </body>
 </html>
